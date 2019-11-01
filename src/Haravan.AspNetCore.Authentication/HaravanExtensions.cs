@@ -36,7 +36,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             builder.Services.Configure<CookiePolicyOptions>(options =>
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
@@ -45,7 +44,7 @@ namespace Microsoft.Extensions.DependencyInjection
             .AddOpenIdConnect("Haravan", options =>
             {
                 options.SignInScheme = $"Cookies.{scheme}";
-                options.Authority = "https://accounts.hara.vn";
+                options.Authority = "https://accounts.haravan.com";
                 options.ClientId = opt.ClientId;
                 options.ClientSecret = opt.ClientSecret;
                 options.ResponseType = "code id_token";

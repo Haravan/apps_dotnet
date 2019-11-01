@@ -26,9 +26,6 @@ namespace mvc.Controllers
         public async Task<IActionResult> LoginCallback() 
         {
             var result = await HttpContext.AuthenticateAsync("Haravan");
-            if(result.Principal == null)
-                return Redirect("/login");
-                
             await HttpContext.SignInAsync(result.Principal, result.Properties);
             return Redirect("/");
         }
