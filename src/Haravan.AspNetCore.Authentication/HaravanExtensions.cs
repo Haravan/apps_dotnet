@@ -3,6 +3,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -32,6 +34,13 @@ namespace Microsoft.Extensions.DependencyInjection
             if(opt.Scopes == null)
                 opt.Scopes = new string[] {};
 
+            builder.Services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
             builder.AddCookie($"Cookies.{scheme}")
             .AddOpenIdConnect("Haravan", options =>
             {
@@ -46,8 +55,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 options.Scope.Add("userinfo");
                 options.Scope.Add("email");
 
-                // foreach(var scope in opt.Scopes)
-                //     options.Scope.Add(scope);
+                foreach(var scope in opt.Scopes)
+                    options.Scope.Add(scope);
 
                 options.Events = new OpenIdConnectEvents();
                 options.Events.OnRedirectToIdentityProvider = (ctx) =>
