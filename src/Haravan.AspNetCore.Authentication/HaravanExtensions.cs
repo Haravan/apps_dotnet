@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -13,15 +14,6 @@ namespace Microsoft.Extensions.DependencyInjection
         public static AuthenticationBuilder AddHaravan(this AuthenticationBuilder builder,
             Action<HaravanOptions> funcOpt)
         {
-            return builder.AddHaravan("Haravan", funcOpt);
-        }
-        public static AuthenticationBuilder AddHaravan(this AuthenticationBuilder builder, 
-            string scheme, 
-            Action<HaravanOptions> funcOpt)
-        {
-            if(scheme == null)
-                throw new ArgumentNullException(nameof(scheme));
-            
             if(funcOpt == null)
                 throw new ArgumentNullException(nameof(funcOpt));
 
@@ -40,34 +32,54 @@ namespace Microsoft.Extensions.DependencyInjection
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            builder.AddCookie($"Cookies.{scheme}")
-            .AddOpenIdConnect("Haravan", options =>
+            builder
+            .AddOpenIdConnect(HaravanAuthenticationConsts.Scheme, options =>
             {
-                options.SignInScheme = $"Cookies.{scheme}";
+                options.SignInScheme = opt.SignInScheme;
                 options.Authority = "https://accounts.haravan.com";
                 options.ClientId = opt.ClientId;
                 options.ClientSecret = opt.ClientSecret;
                 options.ResponseType = "code id_token";
-                options.SaveTokens = true;
+                options.SaveTokens = opt.SaveUserToken;
                 options.GetClaimsFromUserInfoEndpoint = true;
                 options.Scope.Add("org");
                 options.Scope.Add("userinfo");
                 options.Scope.Add("email");
 
+                if(opt.Scopes != null)
                 foreach(var scope in opt.Scopes)
                     options.Scope.Add(scope);
 
-                options.Events = new OpenIdConnectEvents();
-                options.Events.OnRedirectToIdentityProvider = (ctx) =>
+                if(opt.OnUserInformationReceived != null)
                 {
-                    var grantService = ctx.Properties.GetParameter<bool?>("grant_service");
-                    if(grantService != null)
-                    {
-                        ctx.ProtocolMessage.Scope += " grant_service";
-                    }
+                    options.Events = new OpenIdConnectEvents();
+                    options.Events.OnUserInformationReceived = opt.OnUserInformationReceived;
+                }
+            });
 
-                    return Task.CompletedTask;
-                };
+            builder.AddOpenIdConnect(HaravanAuthenticationConsts.ServiceScheme, options =>
+            {
+                options.CallbackPath = $"{options.CallbackPath}_service";
+                options.Authority = "https://accounts.haravan.com";
+                options.ClientId = opt.ClientId;
+                options.ClientSecret = opt.ClientSecret;
+                options.ResponseType = "code id_token";
+                options.GetClaimsFromUserInfoEndpoint = true;
+                options.Scope.Add("org");
+                options.Scope.Add("userinfo");
+                options.Scope.Add("email");
+
+                if(opt.ServiceScopes != null)
+                foreach(var scope in opt.ServiceScopes)
+                    options.Scope.Add(scope);
+
+                options.Scope.Add("grant_service");
+
+                if(opt.OnAppTokenInformationReceived != null)
+                {
+                    options.Events = new OpenIdConnectEvents();
+                    options.Events.OnUserInformationReceived = opt.OnAppTokenInformationReceived;
+                }
             });
 
             return builder;

@@ -5,7 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using mvc.Models;
 
@@ -21,28 +23,25 @@ namespace mvc.Controllers
             _logger = logger;
         }
 
-        [Route("/login_callback")]
-        [AllowAnonymous]
-        public async Task<IActionResult> LoginCallback() 
-        {
-            var result = await HttpContext.AuthenticateAsync("Haravan");
-            await HttpContext.SignInAsync(result.Principal, result.Properties);
-            return Redirect("/");
-        }
-
-        [Route("/login")]
-        [AllowAnonymous]
-        public IActionResult Login() 
-        {
-            return Challenge(new AuthenticationProperties() {
-                RedirectUri = "https://localhost:5001/login_callback"
-            }, "Haravan");
-        }
-
         public IActionResult Index()
         {
             var userName = User.Claims.FirstOrDefault(m => m.Type == "name").Value;
             return View();
+        }
+
+        [Route("/request_app_accestoken_callback")]
+        public async Task<IActionResult> request_app_accestoken_callback() 
+        {
+            var result = await HttpContext.AuthenticateAsync(HaravanAuthenticationConsts.ServiceScheme);
+            return Redirect("/");
+        }
+
+        [Route("/request_app_accestoken")]
+        public IActionResult request_app_accestoken() 
+        {
+            return Challenge(new AuthenticationProperties() {
+                RedirectUri = "https://localhost:5001/request_app_accestoken_callback"
+            }, HaravanAuthenticationConsts.ServiceScheme);
         }
 
         public IActionResult Privacy()

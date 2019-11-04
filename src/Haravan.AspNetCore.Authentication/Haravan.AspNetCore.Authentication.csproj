@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
+    <PackageId>Haravan.AspNetCore.Authentication</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Haravan</Authors>
+    <Company>Haravan</Company>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">

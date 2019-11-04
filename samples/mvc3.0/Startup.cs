@@ -27,16 +27,16 @@ namespace mvc
             services
             .AddAuthentication(opt => {
                 opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = HaravanAuthenticationConsts.Scheme;
             })
-            .AddCookie(opt => {
-                opt.LoginPath = "/login";
-                opt.LogoutPath = "/logout";
-            })
+            .AddCookie()
             .AddHaravan(opt => {
                 opt.ClientId = Configuration["Haravan:ClientId"];
                 opt.ClientSecret = Configuration["Haravan:ClientSecret"];
                 opt.Scopes = Configuration.GetSection("Haravan:Scopes").Get<string[]>();
+                opt.ServiceScopes = Configuration.GetSection("Haravan:ServiceScopes").Get<string[]>();
             });
+            
             services.AddControllersWithViews();
         }
 
