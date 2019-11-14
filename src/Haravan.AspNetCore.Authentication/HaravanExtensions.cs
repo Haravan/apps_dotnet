@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -49,9 +50,12 @@ namespace Microsoft.Extensions.DependencyInjection
                 foreach(var scope in opt.Scopes)
                     options.Scope.Add(scope);
 
+                options.Events = new OpenIdConnectEvents();
+
+                options.Events.OnRedirectToIdentityProvider = OnRedirectToIdentityProvider;
+
                 if(opt.OnUserInformationReceived != null)
                 {
-                    options.Events = new OpenIdConnectEvents();
                     options.Events.OnUserInformationReceived = opt.OnUserInformationReceived;
                 }
             });
@@ -74,14 +78,41 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 options.Scope.Add("grant_service");
 
+                options.Events = new OpenIdConnectEvents();
+
+                options.Events.OnRedirectToIdentityProvider = OnRedirectToIdentityProvider;
+
                 if(opt.OnAppTokenInformationReceived != null)
                 {
-                    options.Events = new OpenIdConnectEvents();
                     options.Events.OnUserInformationReceived = opt.OnAppTokenInformationReceived;
                 }
             });
 
             return builder;
         }
+
+        private static Task OnRedirectToIdentityProvider(RedirectContext ctx)
+        {
+            var parameters = ctx.Properties?.Parameters;
+            if (parameters != null && parameters.Any())
+            {
+                foreach (var pr in parameters)
+                {
+                    if (pr.Key == "scope")
+                    {
+                        if (ctx.ProtocolMessage.Scope == null)
+                            ctx.ProtocolMessage.Scope = pr.Value.ToString();
+                        else
+                            ctx.ProtocolMessage.Scope += " " + pr.Value.ToString();
+                        continue;
+                    }
+
+                    ctx.ProtocolMessage.SetParameter(pr.Key, pr.Value.ToString());
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
     }
 }
