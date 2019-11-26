@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public class HaravanOptions
     {
+        public string Authority { get;set; } = "https://accounts.haravan.com";
         public string SignInScheme { get; set; } = CookieAuthenticationDefaults.AuthenticationScheme;
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }

@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
             .AddOpenIdConnect(HaravanAuthenticationConsts.Scheme, options =>
             {
                 options.SignInScheme = opt.SignInScheme;
-                options.Authority = "https://accounts.haravan.com";
+                options.Authority = opt.Authority;
                 options.ClientId = opt.ClientId;
                 options.ClientSecret = opt.ClientSecret;
                 options.ResponseType = "code id_token";
@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.AddOpenIdConnect(HaravanAuthenticationConsts.ServiceScheme, options =>
             {
                 options.CallbackPath = $"{options.CallbackPath}_service";
-                options.Authority = "https://accounts.haravan.com";
+                options.Authority = opt.Authority;
                 options.ClientId = opt.ClientId;
                 options.ClientSecret = opt.ClientSecret;
                 options.ResponseType = "code id_token";
