@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class HaravanExtensions
     {
         public static AuthenticationBuilder AddHaravan(this AuthenticationBuilder builder,
-            Action<HaravanOptions> funcOpt)
+            Action<HaravanOptions> funcOpt, Action<OpenIdConnectEvents> connectEvents = null)
         {
             if(funcOpt == null)
                 throw new ArgumentNullException(nameof(funcOpt));
@@ -58,6 +58,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     options.Events.OnUserInformationReceived = opt.OnUserInformationReceived;
                 }
+
+                if(connectEvents != null)
+                    connectEvents(options.Events);
             });
 
             builder.AddOpenIdConnect(HaravanAuthenticationConsts.ServiceScheme, options =>
@@ -86,6 +89,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 {
                     options.Events.OnUserInformationReceived = opt.OnAppTokenInformationReceived;
                 }
+
+                if(connectEvents != null)
+                    connectEvents(options.Events);
             });
 
             return builder;
